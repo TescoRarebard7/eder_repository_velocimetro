@@ -17,6 +17,7 @@ class start: AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var speedSensor: Sensor? = null
     private lateinit var speedTextView: TextView
+    private lateinit var Momi: TextView
     private var isMtS:Boolean  = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +25,7 @@ class start: AppCompatActivity(), SensorEventListener {
         setContentView(R.layout.activity_start)
 
         speedTextView = findViewById(R.id.velocidad)
+        Momi = findViewById(R.id.MoMi)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         isMtS = false
 
@@ -36,7 +38,19 @@ class start: AppCompatActivity(), SensorEventListener {
 
         // Obtener el sensor de velocidad
         speedSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+
+        Momi.setOnClickListener {
+            if (isMtS.equals(false)){
+                isMtS = true
+                Momi.text = "M/S"
+            }else{
+                isMtS = false
+                Momi.text = "Mi/S"
+            }
+        }
     }
+
+
 
     override fun onResume() {
         super.onResume()
@@ -60,27 +74,24 @@ class start: AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            var speed:Float = (0.0).toFloat() ;
-            if (isMtS.equals(true)){
+            var speed: Float = 0.0f
+            var formattedSpeed = ""
+
+            if (isMtS) {
                 speed = if (event.values[0] < 0) 0f else event.values[0]
-            }else{
+                formattedSpeed = "%.2f".format(speed)
+            } else {
                 val metersPerSecond = if (event.values[0] < 0) 0f else event.values[0]
-                speed = metersPerSecond * 2.23694f
+                speed = metersPerSecond * 0.000621371f
+                formattedSpeed = "%.5f".format(speed)
             }
 
-
-            val formattedSpeed = "%.2f".format(speed) // Limitar a dos decimales
-
-            // Establecer un límite inferior para la velocidad
-            if (speed >= 0.1f) {
-                runOnUiThread {
-                    speedTextView.text = "$formattedSpeed"
-                }
-            }else{
-                speedTextView.text = "0"
+            runOnUiThread {
+                speedTextView.text = "$formattedSpeed"
             }
         }
     }
+
 
 
 }
